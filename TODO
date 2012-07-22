@@ -1,0 +1,5 @@
+case insensitive literals
+case insensitive pragma
+unicode pragma
+comments
+quantifiers {2,4}, {1,}, {0,}
