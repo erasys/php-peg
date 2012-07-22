@@ -26,7 +26,7 @@ function match_quoted_string ($stack = array()) {
 	do {
 		$stack[] = $result;
 		$result = $this->construct($matchrule, "q"); 
-		if (($subres = $this->rx('/["\']/')) !== FALSE) {
+		if (($subres = $this->rx('/["\']/xS')) !== FALSE) {
 			$result["text"] .= $subres;
 			$subres = $result;
 			$result = array_pop($stack);
@@ -40,7 +40,13 @@ function match_quoted_string ($stack = array()) {
 		$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
 		if ($subres !== FALSE) { $this->store($result, $subres); }
 		else { $_4 = FALSE; break; }
-		if (($subres = $this->literal(''.$this->expression($result, $stack, 'q').'')) !== FALSE) { $result["text"] .= $subres; }
+		$expr_value = ''.$this->expression($result, $stack, 'q').'';
+		$expr_len = strlen($expr_value);
+		$subres = substr($this->string, $this->pos, $expr_len);
+		if ($expr_value === $subres) {
+			$this->pos += $expr_len;
+			$result["text"] .= $subres;
+		}
 		else { $_4 = FALSE; break; }
 		$_4 = TRUE; break;
 	}
@@ -61,7 +67,7 @@ function match_word ($stack = array()) {
 		$pos_6 = $this->pos;
 		$_8 = NULL;
 		do {
-			if (($subres = $this->rx('/[a-zA-Z]+/')) !== FALSE) { $result["text"] .= $subres; }
+			if (($subres = $this->rx('/[a-zA-Z]+/xS')) !== FALSE) { $result["text"] .= $subres; }
 			else { $_8 = FALSE; break; }
 			$_8 = TRUE; break;
 		}
@@ -87,3 +93,24 @@ function match_word ($stack = array()) {
 
 
 }
+
+$str_p = '@
+    (["\'])             # A string delimiter
+    (
+      (?:               # 0 or more:
+        \\\\ .         # backslash followed by the delimiter
+        |               # or
+        (?: (?!\1). )   # not the delimiter followed by anything
+      )*
+    )
+    \1                  # the closing delimiter
+    (                   # optionally:
+      !!                # the cancel-all flag
+      |                 # or
+      (?: !? [a-z] )*   # any number of positive or negative flags
+    )?
+  @xiU';
+preg_match($str_p, 'obs_qp: "\\\\" ( "\x00" | obs_NO_WS_CTL | LF | CR )', $matches);
+var_dump($matches);
+
+

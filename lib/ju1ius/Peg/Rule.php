@@ -61,7 +61,7 @@ class Rule extends Writer
     (["\'])             # A string delimiter
     (
       (?:               # 0 or more:
-        \\\\ \1         # backslah followed by the delimiter
+        \\\\ .          # backslah followed by anything
         |               # or
         (?: (?!\1). )   # not the delimiter followed by anything
       )*
@@ -345,6 +345,7 @@ class Rule extends Writer
 
 					default:
 						user_error("Can't parse '$c' - attempting to skip", E_USER_WARNING);
+            var_dump(substr($str, $o, 12), $str);
             break;
 				}
 			}
