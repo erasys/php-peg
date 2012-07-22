@@ -165,17 +165,9 @@ class Rule extends Writer
   public function parse_rule()
   {
 		$rule = trim($this->rule);
-
-		/* If this is a regex end-token, just mark it and return */
-		if (substr($rule, 0, 1) == '/') {
-			$this->parsed = new Token\Regex($rule);
-		}
-		else {
-			$tokens = array();
-			$this->tokenize($rule, $tokens);
-			$this->parsed = (count($tokens) == 1 ? array_pop($tokens) : new Token\Sequence($tokens));
-		}
-		
+    $tokens = array();
+    $this->tokenize($rule, $tokens);
+    $this->parsed = (1 === count($tokens) ? array_pop($tokens) : new Token\Sequence($tokens));
 	}
 
   public function tokenize($str, &$tokens, $o = 0)
