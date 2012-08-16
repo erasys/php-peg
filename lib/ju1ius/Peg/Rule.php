@@ -248,7 +248,8 @@ class Rule extends Writer
         // ensure unique options
         $flags = implode('', array_unique($flags));
 
-        $tokens[] = $t = new Token\Regex("/$pattern/$flags");
+        //$tokens[] = $t = new Token\Regex("/$pattern/$flags");
+        $tokens[] = $t = new Token\Regex("/\G$pattern/$flags");
         $pending->apply_if_present($t);
 				$o += strlen($match[0]);
 			}

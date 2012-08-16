@@ -84,7 +84,7 @@ class Parser
 
   public function packread($key, $pos)
   {
-		throw 'PackRead after PackHas=>false in Parser.php';
+		throw new \LogicException('packread called after packhas == false');
 	}
 
   public function packwrite($key, $pos, $res)
@@ -137,13 +137,15 @@ class Parser
 			$callback = array($this, $storetag ? "{$type}_{$storetag}" : "{$type}_{$subres['name']}");
 			if (is_callable($callback)) {
 				call_user_func_array($callback, array(&$result, $subres));
-				$storecalled = true; break;
+        $storecalled = true;
+        break;
 			}
 			
 			$globalcb = array($this, "{$type}_STR");
 			if (is_callable($globalcb)) {
 				call_user_func_array($globalcb, array(&$result, $subres));
-				$storecalled = true; break;
+        $storecalled = true;
+        break;
 			}
 		}	
 		

@@ -16,6 +16,10 @@ class Regex extends Expressionable
 		parent::__construct('rx', self::escape($value));
 	}
 
+  //public function match_code($value)
+  //{
+		//return parent::match_code("'{$value}'");
+	//}
   public function match_code($value)
   {
 		return parent::match_code("'{$value}'");

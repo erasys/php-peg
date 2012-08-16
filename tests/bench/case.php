@@ -2,66 +2,46 @@
 
 require_once 'Benchmark/Timer.php';
 
-function casecmp_internal($str1, $str2)
+function casecmp_internal($str1)
 {
-  return 0 === strcasecmp($str1, $str2);
+  $str2 = '7bit';
+  if(0 === strcasecmp($str1, $str2)) return true;
+  $str2 = '8bit';
+  if(0 === strcasecmp($str1, $str2)) return true;
+  $str2 = 'binary';
+  if(0 === strcasecmp($str1, $str2)) return true;
+  $str2 = 'base64';
+  if(0 === strcasecmp($str1, $str2)) return true;
+  $str2 = 'quoted-printable';
+  if(0 === strcasecmp($str1, $str2)) return true;
+  $str2 = 'gzip';
+  if(0 === strcasecmp($str1, $str2)) return true;
+  return false;
 }
-function casecmp_pcre($str1, $str2)
+function casecmp_pcre($str1)
 {
-  return preg_match('/'.preg_quote($str1, '/').'/i', $str2);
-}
-function casecmp_mbstring($str1, $str2)
-{
-  return mb_strtolower($str1, "utf-8") === mb_strtolower($str2, "utf-8");
-}
-function casecmp_mbstring_2($str1, $str2)
-{
-  return $str1 === mb_strtolower($str2, "utf-8");
-}
-function casecmp_pcre_u($str1, $str2)
-{
-  return preg_match('/'.preg_quote($str1, '/').'/iu', $str2);
+  return preg_match('/^(?:7bit|8bit|binary|base64|quoted-printable|gzip)$/i', $str1);
 }
 
 $timer = new Benchmark_Timer();
 $nb_iterations = 100000;
 $timer->start();
 
+$str = "7bits";
+
 echo "casecmp_internal\n";
 for ($i = 0; $i < $nb_iterations; $i++) {
-  $r = casecmp_internal('wam\bam', 'Wam\BAM');
+  $r = casecmp_internal($str);
 }
 var_dump($r);
 $timer->setMarker('casecmp_internal');
 
 echo "casecmp_pcre\n";
 for ($i = 0; $i < $nb_iterations; $i++) {
-   $r = casecmp_pcre('wam/bam', 'Wam/BAM');
+   $r = casecmp_pcre($str);
 }
 var_dump($r);
 $timer->setMarker('casecmp_pcre');
-
-echo "casecmp_mbstring\n";
-for ($i = 0; $i < $nb_iterations; $i++) {
-   $r = casecmp_mbstring('Wœm bŒm', 'wœm bœm');
-}
-var_dump($r);
-$timer->setMarker('casecmp_mbstring');
-
-echo "casecmp_mbstring_2\n";
-for ($i = 0; $i < $nb_iterations; $i++) {
-   $r = casecmp_mbstring_2('wœm bœm', 'Wœm bŒm');
-}
-var_dump($r);
-$timer->setMarker('casecmp_mbstring_2');
-
-
-echo "casecmp_pcre_u\n";
-for ($i = 0; $i < $nb_iterations; $i++) {
-   $r = casecmp_pcre_u('Wœm{}bŒm', 'wœm{}bœm');
-}
-var_dump($r);
-$timer->setMarker('casecmp_pcre_u');
 
 echo $timer->getOutput();
 
