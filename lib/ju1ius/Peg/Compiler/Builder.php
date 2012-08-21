@@ -3,7 +3,10 @@
 namespace ju1ius\Peg\Compiler;
 
 
-class Builder {
+class Builder
+{
+  public static $indent_char = "  ";
+
 
   public static function build()
   {
@@ -19,14 +22,15 @@ class Builder {
   {
 		foreach (func_get_args() as $lines) {
 			if (!$lines) continue;
-
-			if (is_string($lines)) $lines = preg_split('/\r\n|\r|\n/', $lines);
+      if (is_string($lines)) {
+        $lines = preg_split('/\r\n|\r|\n/', $lines);
+      }
 			if (!$lines) continue;
 
       if ($lines instanceof Builder) {
         $lines = $lines->lines;
       } else {
-        $lines = array_map('ltrim', $lines);
+        //$lines = array_map('ltrim', $lines);
       }
 			if (!$lines) continue;
 
@@ -108,15 +112,15 @@ class Builder {
 		return $this;
 	}
 
-  public function render($array = NULL, $indent = "")
+  public function render($array = null, $indent = "")
   {
-		if ($array === NULL) $array = $this->lines;
+		if ($array === null) $array = $this->lines;
 
 		$out = array();
 		foreach($array as $line) {
 			if (is_array($line)) {
 				list($entry, $block) = $line;
-				$str = $this->render($block, $indent . "\t");
+				$str = $this->render($block, $indent . self::$indent_char);
 
 				if (strlen($str) < 40) {
 					$out[] = $indent . $entry . ' { ' . ltrim($str) . ' }';
@@ -125,7 +129,7 @@ class Builder {
 					$out[] = $str;
 					$out[] = $indent . '}';
 				}
-			} else {
+      } else {
 				$out[] = $indent . $line;
 			}
 		}

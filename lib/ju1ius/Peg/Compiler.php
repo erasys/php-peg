@@ -3,11 +3,13 @@
 namespace ju1ius\Peg;
 
 use ju1ius\Peg\Compiler\Builder;
+use ju1ius\Peg\Exception\GrammarException;
 
 /**
  * PEG Generator - A PEG Parser for PHP
  *
  * @author Hamish Friedlander / SilverStripe
+ * @author ju1ius http://github.com/ju1ius
  *
  * See README.md for documentation
  * 
@@ -21,7 +23,7 @@ class Compiler
 
   public static $currentClass = null;
 
-	public static $rx = '~^
+	const RULESET_RX = '~^
     ([\x20\t]*)                   # indent
     /\*!\*                        # ruleset begin marker
     (?:
@@ -65,7 +67,7 @@ class Compiler
 					return '';
 			}
 			
-			throw new \RuntimeException("Unknown pragma $class encountered when compiling parser");
+			throw new GrammarException("Unknown pragma $class encountered when compiling parser");
 		}
 
 		/* Get the parser name for this block */
@@ -107,7 +109,50 @@ class Compiler
 
   public static function compile($string)
   {
-		return preg_replace_callback(self::$rx, array('ju1ius\Peg\Compiler', 'create_parser'), $string);
+    return preg_replace_callback(
+      self::RULESET_RX,
+      array('ju1ius\Peg\Compiler', 'create_parser'),
+      $string
+    );
 	}
+
+  /**
+   * ==========> Debugging utilities
+   **/
+
+  public static function debug_header()
+  {
+    if (!self::$debug) return null;
+
+    return Builder::build()->l(
+      '$indent = str_repeat("    ", $this->depth);',
+			'$this->depth++;'
+    );
+  }
+  public static function debug_match()
+  {
+    if (!self::$debug) return null;
+
+    return Builder::build()->l(
+      'printf("%sMATCH\n", $indent);',
+      '$this->depth--;'
+    );
+  }
+  public static function debug_fail()
+  {
+    if (!self::$debug) return null;
+
+    return Builder::build()->l(
+      'printf("%sFAIL\n", $indent);',
+      '$this->depth--;'
+    );
+  }
+  public static function debug_escape_nl($invar, $outvar)
+  {
+    return sprintf(
+      '%s = preg_replace(["/\r/", "/\n/"], [\'\r\', \'\n\'], %s);',
+      $invar, $outvar
+    );
+  }
 
 }

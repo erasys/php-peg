@@ -12,6 +12,9 @@ use ju1ius\Peg\Parser;
  */
 class FalseOnlyPackrat extends Parser
 {
+  protected $packstatebase;
+  protected $packstate;
+
   public function setSource($string)
   {
     parent::setSource($string);
@@ -22,19 +25,20 @@ class FalseOnlyPackrat extends Parser
 
   public function packhas($key, $pos)
   {
-		return isset($this->packstate[$key]) && $this->packstate[$key][$pos] == 'F';
+		return isset($this->packstate[$key]) && 'F' === $this->packstate[$key][$pos];
 	}
 
   public function packread($key, $pos)
   {
-		return FALSE;
+		return false;
 	}
 
   public function packwrite($key, $pos, $res)
   {
-		if (!isset($this->packstate[$key])) $this->packstate[$key] = $this->packstatebase;
-
-		if ($res === FALSE) {
+    if (!isset($this->packstate[$key])) {
+      $this->packstate[$key] = $this->packstatebase;
+    }
+		if (false === $res) {
 			$this->packstate[$key][$pos] = 'F';
 		}
 

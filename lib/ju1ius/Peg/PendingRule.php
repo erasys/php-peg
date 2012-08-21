@@ -10,24 +10,24 @@ namespace ju1ius\Peg;
  */
 class PendingRule
 {
-  public function __construct()
-  {
-		$this->what = NULL;
-	}
+  protected $prop_name = null;
+  protected $prop_val = null;
 
-  public function set($what, $val = TRUE)
+  public function set($what, $value=true)
   {
-		$this->what = $what;
-		$this->val = $val;
+		$this->prop_name = $what;
+		$this->prop_val = $value;
 	}
 
   public function apply_if_present($on)
   {
-		if ($this->what !== NULL) {
-			$what = $this->what;
-			$on->$what = $this->val;
+    if (null !== $this->prop_name) {
 
-			$this->what = NULL;
+			$what = $this->prop_name;
+			$on->$what = $this->prop_val;
+
+      $this->prop_name = null;
+
 		}
 	}
 }

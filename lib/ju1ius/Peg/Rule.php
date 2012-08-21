@@ -6,6 +6,7 @@ use ju1ius\Peg\RuleSet;
 use ju1ius\Peg\Token;
 use ju1ius\Peg\Compiler\Builder;
 use ju1ius\Peg\Compiler\Writer;
+use ju1ius\Peg\Exception\GrammarException;
 
 
 /**
@@ -19,14 +20,14 @@ use ju1ius\Peg\Compiler\Writer;
 class Rule extends Writer
 {
 	const RULE_RX = '@
-    (?<name> \w+)                         # The name of the rule
-   (\s+ extends \s+ (?<extends>\w+))?  # The extends word
-   (\s* \( (?<arguments>.*) \))?       # Any variable setters
+    (?<name> [\w-]+)                        # The name of the rule
+    (\s+ extends \s+ (?<extends>[\w-]+))?   # The extends word
+    (\s* \( (?<arguments>.*) \))?           # Any variable setters
     (
-      \s*(?<matchmark>:) |               # Marks the matching rule start
-      \s*(?<replacemark>;) |             # Marks the replacing rule start
+      \s*(?<matchmark>:) |              # Marks the matching rule start
+      \s*(?<replacemark>;) |            # Marks the replacing rule start
       \s*$
-   )
+    )
     (?<rule>[\s\S]*)
   @x';
 
@@ -39,7 +40,7 @@ class Rule extends Writer
 	
 	const REPLACEMENT_RX = '@
    (([^=]|=[^>])+)    # What to replace
-    =>                   # The replacement mark
+    =>                # The replacement mark
    ([^,]+)            # What to replace it with
     (,|$)
 	@x';
@@ -55,7 +56,7 @@ class Rule extends Writer
     )*)
     /
     ([imsxADSUJu]*)?          # PCRE only flags
-    @xu';
+  @xu';
 
   const LITERAL_RX = '@\G
     (["\'])             # A string delimiter
@@ -98,20 +99,25 @@ class Rule extends Writer
 		
 		// Parse out the spec
 		$spec = implode("\n", $spec);
-		if (!preg_match(self::RULE_RX, $spec, $specmatch)) user_error('Malformed rule spec ' . $spec, E_USER_ERROR);
+    if (!preg_match(self::RULE_RX, $spec, $specmatch)) {
+      throw new GrammarException('Malformed rule spec: ' . $spec);
+    }
 		
 		$this->name = $specmatch['name'];
 		
 		if ($specmatch['extends']) {
 			$this->extends = $this->parent->rules[$specmatch['extends']];
-			if (!$this->extends) user_error('Extended rule '.$specmatch['extends'].' is not defined before being extended', E_USER_ERROR);
+      if (!$this->extends) {
+        throw new GrammarException(
+          'Extended rule '.$specmatch['extends'].' is not defined before being extended'
+        );
+      }
 		}
 		
 		$this->arguments = array();
 		
 		if ($specmatch['arguments']) {
 			preg_match_all(self::ARGUMENT_RX, $specmatch['arguments'], $arguments, PREG_SET_ORDER);
-			
 			foreach ($arguments as $argument){
 				$this->arguments[trim($argument[1])] = trim($argument[2]);
 			}
@@ -119,14 +125,18 @@ class Rule extends Writer
 		
 		$this->mode = $specmatch['matchmark'] ? 'rule' : 'replace';
 		
-    if ($this->mode == 'rule') {
+    if ('rule' === $this->mode) {
 
 			$this->rule = $specmatch['rule'];
       $this->parse_rule();
 
     } else {
 
-			if (!$this->extends) user_error('Replace matcher, but not on an extends rule', E_USER_ERROR);
+      if (!$this->extends) {
+        throw new GrammarException(
+          'Replace matcher, but not on an extends rule'
+        );
+      }
 			
 			$this->replacements = array();
 			preg_match_all(self::REPLACEMENT_RX, $specmatch['rule'], $replacements, PREG_SET_ORDER);
@@ -149,15 +159,16 @@ class Rule extends Writer
 		
 		$this->functions = array();
 
-		$active_function = NULL;
+    $active_function = null;
 
 		foreach($funcs as $line) {
 			/* Handle function definitions */
 			if (preg_match(self::FUNCTION_RX, $line, $func_match, 0)) {
 				$active_function = $func_match[1];
 				$this->functions[$active_function] = $func_match[2] . PHP_EOL;
-			}
-			else $this->functions[$active_function] .= $line . PHP_EOL;
+			} else {
+        $this->functions[$active_function] .= $line . PHP_EOL;
+      }
 		}
 	}
 
@@ -249,7 +260,7 @@ class Rule extends Writer
         $flags = implode('', array_unique($flags));
 
         //$tokens[] = $t = new Token\Regex("/$pattern/$flags");
-        $tokens[] = $t = new Token\Regex("/\G$pattern/$flags");
+        $tokens[] = $t = new Token\Regex("/$pattern/$flags");
         $pending->apply_if_present($t);
 				$o += strlen($match[0]);
 			}
@@ -264,7 +275,11 @@ class Rule extends Writer
 				$l = count($tokens) - 1;
 				$o += strlen($match[0]);
 				user_error("TODO: Flags not currently supported", E_USER_WARNING);
-			}
+      }
+      /* Handle closures */
+      //elseif preg_match('/\{\{(.)\}\}/'){
+        
+      //}
 			/* Handle control tokens */
       else {
 				$c = substr($str, $o, 1);
@@ -307,11 +322,11 @@ class Rule extends Writer
 
 					case '[':
 					case ']':
-						$tokens[] = new Token\Whitespace(FALSE);
+						$tokens[] = new Token\Whitespace(false);
 						break;
 					case '<':
 					case '>':
-						$tokens[] = new Token\Whitespace(TRUE);
+						$tokens[] = new Token\Whitespace(true);
 						break;
 
 					case '(':
@@ -366,10 +381,11 @@ class Rule extends Writer
 		// Build an array of additional arguments to add to result node (if any)
 		if (empty($this->arguments)) {
 			$arguments = 'null';
-		}
-		else {
+		} else {
 			$arguments = "array(";
-			foreach ($this->arguments as $k=>$v) { $arguments .= "'$k' => '$v'"; }
+      foreach ($this->arguments as $k => $v) {
+        $arguments .= "'$k' => '$v'";
+      }
 			$arguments .= ")";
 		}
 		
@@ -377,24 +393,27 @@ class Rule extends Writer
 		
 		$match->l("protected \$match_{$function_name}_typestack = $typestack;");
 
-		$match->b("function match_{$function_name} (\$stack = array())",
+    $match->b(
+      'public function match_'.$function_name.' ($stack = array())',
       '$matchrule = "'.$function_name.'";',
       '$result = $this->construct($matchrule, $matchrule, '.$arguments.');',
 			$this->parsed->compile()->replace(array(
 				'MATCH' => 'return $this->finalise($result);',
-				'FAIL' => 'return FALSE;'
+				'FAIL' => 'return false;'
 			))
 		);
 
 		$functions = array();
 		foreach($this->functions as $name => $function) {
-			$function_name = $this->function_name(preg_match('/^_/', $name) ? $this->name.$name : $this->name.'_'.$name);
+      $function_name = $this->function_name(
+        preg_match('/^_/', $name) ? $this->name.$name : $this->name.'_'.$name
+      );
 			$functions[] = implode(PHP_EOL, array(
-				'function ' . $function_name . ' ' . $function
+				'public function ' . $function_name . ' ' . $function
 			));
 		}
 
 		// print_r($match); return '';
-		return $match->render(NULL, $indent) . PHP_EOL . PHP_EOL . implode(PHP_EOL, $functions);
+		return $match->render(null, $indent) . PHP_EOL . PHP_EOL . implode(PHP_EOL, $functions);
 	}
 }

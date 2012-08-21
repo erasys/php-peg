@@ -18,6 +18,10 @@ use ju1ius\Peg\Parser;
  */
 class Packrat extends Parser
 {
+  protected $packstatebase;
+  protected $packstate;
+  protected $packres;
+
   public function setSource($string)
   {
 		parent::setSource($string);
@@ -35,31 +39,32 @@ class Packrat extends Parser
 		$pos *= 3;
     return isset($this->packstate[$key])
       && isset($this->packstate[$key][$pos])
-      && $this->packstate[$key][$pos] !== "\xFF";
+      && "\xFF" !== $this->packstate[$key][$pos];
 	}
 
   public function packread($key, $pos)
   {
 		$pos *= 3;
-		if ($this->packstate[$key][$pos] === "\xFE") return FALSE;
+		if ("\xFE" === $this->packstate[$key][$pos]) return false;
 
-		$this->pos = ord($this->packstate[$key][$pos]) << 16 | ord($this->packstate[$key][$pos+1]) << 8 | ord($this->packstate[$key][$pos+2]);
+    $this->pos = ord($this->packstate[$key][$pos]) << 16
+      | ord($this->packstate[$key][$pos+1]) << 8
+      | ord($this->packstate[$key][$pos+2]);
 		return $this->packres["$key:$pos"];
 	}
 
   public function packwrite($key, $pos, $res)
   {
-		if (!isset($this->packstate[$key])) $this->packstate[$key] = $this->packstatebase;
-
+    if (!isset($this->packstate[$key])) {
+      $this->packstate[$key] = $this->packstatebase;
+    }
 		$pos *= 3;
 
-		if ($res !== FALSE) {
+		if (false !== $res) {
 			$i = pack('N', $this->pos);
-
 			$this->packstate[$key][$pos]   = $i[1];
 			$this->packstate[$key][$pos+1] = $i[2];
 			$this->packstate[$key][$pos+2] = $i[3];
-
 			$this->packres["$key:$pos"] = $res;
 		} else {
 			$this->packstate[$key][$pos] = "\xFE";

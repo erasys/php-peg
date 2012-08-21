@@ -20,49 +20,52 @@ class Recurse extends Token
 	
   public function match_code($value)
   {
-		$function = $this->match_function($value);
-		$storetag = $this->function_name($this->tag ? $this->tag : $this->match_function($value));
+    $function = $this->match_function($value);
 
+
+    $debug_header = Compiler::debug_header();
+    $debug_match = Compiler::debug_match();
+    $debug_fail = Compiler::debug_fail();
 		if (Compiler::$debug) {
-			$debug_header = Builder::build()
-				->l(
-				'$indent = str_repeat(" ", $this->depth);',
-				'$this->depth += 2;',
-				'$sub = (strlen($this->string) - $this->pos > 20) ? (substr($this->string, $this->pos, 20) . "...") : substr($this->string, $this->pos);',
-				'$sub = preg_replace(\'/(\r|\n)+/\', " {NL} ", $sub);',
-				'print($indent."Matching against $matcher (".$sub.")\n");'
-				);
-
-			$debug_match = Builder::build()
-				->l(
-				'print($indent."MATCH\n");',
-				'$this->depth -= 2;'
-				);
-
-			$debug_fail = Builder::build()
-				->l(
-				'print($indent."FAIL\n");',
-				'$this->depth -= 2;'
-				);
+			$debug_header->l(
+        '$debug_sub = (strlen($this->string) - $this->pos > 20)',
+        '  ? (substr($this->string, $this->pos, 20) . " [...]")',
+        '  : substr($this->string, $this->pos);',
+        Compiler::debug_escape_nl('$debug_sub', '$debug_sub'),
+        'printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);'
+			);
 		}
-		else {
-			$debug_header = $debug_match = $debug_fail = NULL;
-		}
+
+    /**
+     * Storage logic
+     * if silent flag is applied, callbacks and result text are ignored
+     **/
+    $storage = null;
+    if (!$this->silent) {
+      $storetag = $this->function_name(
+        $this->tag ? $this->tag : $function
+      );
+      $storage = false === $this->tag
+        ? '$this->store($result, $subres);'
+        : '$this->store($result, $subres, "'.$storetag.'");';
+    }
 
 		return Builder::build()->l(
-			'$matcher = \'match_\'.'.$function.'; $key = $matcher; $pos = $this->pos;',
+      '$matcher = \'match_\'.'.$function.';',
+      '$key = $matcher; $pos = $this->pos;',
 			$debug_header,
-			'$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));',
-			$this->match_fail_conditional('$subres !== FALSE',
+      '$subres = $this->packhas($key, $pos)',
+      '  ? $this->packread($key, $pos)',
+      '  : $this->packwrite($key, $pos,',
+      '      $this->$matcher(array_merge($stack, array($result)))',
+      '    );',
+      $this->match_fail_conditional(
+        'false !== $subres',
 				Builder::build()->l(
 					$debug_match,
-					$this->tag === FALSE ?
-						'$this->store($result, $subres);' :
-						'$this->store($result, $subres, "'.$storetag.'");'
+          $storage
 				),
-				Builder::build()->l(
-					$debug_fail
-				)
+				Builder::build()->l($debug_fail)
 			));
 	}
 }

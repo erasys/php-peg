@@ -15,9 +15,12 @@ use ju1ius\Peg\Parser;
  */
 class ConservativePackrat extends Parser
 {
+  protected $packres = array();
+  protected $packpos = array();
+
   public function packhas($key, $pos)
   {
-		return isset($this->packres[$key]) && $this->packres[$key] !== NULL;
+		return isset($this->packres[$key]) && null !== $this->packres[$key];
 	}
 
   public function packread($key, $pos)
@@ -32,7 +35,7 @@ class ConservativePackrat extends Parser
 			$this->packres[$key] = $res;
 			$this->packpos[$key] = $this->pos;
 		} else {
-			$this->packres[$key] = NULL;
+			$this->packres[$key] = null;
 		}
 		return $res;
 	}

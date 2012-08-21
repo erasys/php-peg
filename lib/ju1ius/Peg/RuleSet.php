@@ -56,12 +56,17 @@ class RuleSet
 			// Ignore blank lines
 			if (!trim($line)) continue;
 			// Ignore comments
-			if (preg_match('/^[\x20|\t]+#/', $line)) continue;
+      if (preg_match('/^[\x20\x09]*#/', $line)) continue;
 			
 			// Strip off indent
 			if (!empty($indent)) { 
-				if (strpos($line, $indent) === 0) $line = substr($line, strlen($indent));
-				else user_error('Non-blank line with inconsistent index in parser block', E_USER_ERROR);
+        var_dump($indent, $line);
+        
+        if (0 === strpos($line, $indent)) {
+          $line = substr($line, strlen($indent));
+        } else {
+          user_error('Non-blank line with inconsistent index in parser block', E_USER_ERROR);
+        }
 			}
 			
 			// Any indented line, add to current set of lines
