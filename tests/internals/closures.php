@@ -1,30 +1,39 @@
 <?php
 
-require_once __DIR__.'/../autoload.php';
+require_once __DIR__.'/../../autoloader.php';
 
-use ju1ius\Peg\Compiler;
+use hafriedlander\Peg\Compiler;
 
-$str = <<<EOS
+$str = <<<'EOS'
 /*!* FooBar 
 
 date_field: "Date:"> date_time
+
 date_time: {{
-  try {
-    $d = new \DateTime($value);
-    return $d;
-  } catch (\Exception $e) {
-    return false;
-  }
-}}
+    $eol = strpos($this->string, "\n", $this->pos);
+    if (false === $eol) return false;
+    $value = substr($this->string, $this->pos, $eol);
+    try {
+        $d = new \DateTime($value);
+    } catch (\Exception $e) {
+        return false;
+    }
+    $this->pos += strlen($value);
+    return $d->format('r');
+    }}
 */
 EOS;
 
-eval('
-use ju1ius\Peg\Parser;
-class Qparser extends Parser {
-'.Compiler::compile($str).'
-}');
-$p = new Qparser("BazBazBazBazBaz");
-var_dump($p->match_strict());
+$code = "use hafriedlander\Peg\Parser;
+class ClosureTest extends Parser\Basic
+{
+" . Compiler::compile($str) . "
+}";
+eval($code);
+
+//file_put_contents(__DIR__.'/ClosureTest.php','<?php'.$code);
+
+$p = new ClosureTest("Date: 24-12-1979\n");
+var_dump($p->match_date_field());
 
 //Compiler::compile($str);

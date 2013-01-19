@@ -1,362 +1,590 @@
 <?php
 
-use ju1ius\Peg\Parser;
+use hafriedlander\Peg\Parser;
 
-class Calculator extends Parser
+class Calculator extends Parser\Basic
 {
 
-/* Number: /[0-9]+/ */
-protected $match_Number_typestack = array('Number');
-function match_Number ($stack = array()) {
-	$matchrule = "Number";
+/* int: / [-]?[1-9][0-9]* / */
+protected $match_int_typestack = array('int');
+public function match_int ($stack = array()) {
+	$matchrule = "int";
 	$result = $this->construct($matchrule, $matchrule, null);
-	if (($subres = $this->rx('/\G[0-9]+/xS')) !== FALSE) {
-		$result["text"] .= $subres;
+	if (false !== ($subres = $this->rx('/ [-]?[1-9][0-9]* /xS'))) {
+		$result["_text"] .= $subres;
 		return $this->finalise($result);
 	}
-	else { return FALSE; }
+	else { return false; }
 }
 
 
-/* Value: Number > | '(' > Expr > ')' > */
-protected $match_Value_typestack = array('Value');
-function match_Value ($stack = array()) {
-	$matchrule = "Value";
+
+
+/* float: / [-]?[0-9]*\.[0-9]+ / */
+protected $match_float_typestack = array('float');
+public function match_float ($stack = array()) {
+	$matchrule = "float";
 	$result = $this->construct($matchrule, $matchrule, null);
-	$_14 = NULL;
+	if (false !== ($subres = $this->rx('/ [-]?[0-9]*\.[0-9]+ /xS'))) {
+		$result["_text"] .= $subres;
+		return $this->finalise($result);
+	}
+	else { return false; }
+}
+
+
+
+
+/* num: int | float */
+protected $match_num_typestack = array('num');
+public function match_num ($stack = array()) {
+	$matchrule = "num";
+	$result = $this->construct($matchrule, $matchrule, null);
+	$_5 = null;
 	do {
-		$res_1 = $result;
-		$pos_1 = $this->pos;
-		$_4 = NULL;
+		$res_2 = $result;
+		$pos_2 = $this->pos;
+		$matcher = 'match_'.'int';
+		$key = $matcher; $pos = $this->pos;
+		$indent = str_repeat("    ", $this->depth);
+		$this->depth++;
+		$debug_sub = (strlen($this->string) - $this->pos > 20)
+		? (substr($this->string, $this->pos, 20) . " [...]")
+		: substr($this->string, $this->pos);
+		$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+		printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+		$subres = $this->packhas($key, $pos)
+		? $this->packread($key, $pos)
+		: $this->packwrite($key, $pos,
+		$this->$matcher(array_merge($stack, array($result)))
+		);
+		if (false !== $subres) {
+			printf("%sMATCH\n", $indent);
+			$this->depth--;
+			$this->store($result, $subres);
+			$_5 = true; break;
+		}
+		else {
+			printf("%sFAIL\n", $indent);
+			$this->depth--;
+		}
+		$result = $res_2;
+		$this->pos = $pos_2;
+		$matcher = 'match_'.'float';
+		$key = $matcher; $pos = $this->pos;
+		$indent = str_repeat("    ", $this->depth);
+		$this->depth++;
+		$debug_sub = (strlen($this->string) - $this->pos > 20)
+		? (substr($this->string, $this->pos, 20) . " [...]")
+		: substr($this->string, $this->pos);
+		$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+		printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+		$subres = $this->packhas($key, $pos)
+		? $this->packread($key, $pos)
+		: $this->packwrite($key, $pos,
+		$this->$matcher(array_merge($stack, array($result)))
+		);
+		if (false !== $subres) {
+			printf("%sMATCH\n", $indent);
+			$this->depth--;
+			$this->store($result, $subres);
+			$_5 = true; break;
+		}
+		else {
+			printf("%sFAIL\n", $indent);
+			$this->depth--;
+		}
+		$result = $res_2;
+		$this->pos = $pos_2;
+		$_5 = false; break;
+	}
+	while(0);
+	if(true === $_5) { return $this->finalise($result); }
+	if(false === $_5) { return false; }
+}
+
+
+
+
+/* fact: num > | '(' > expr > ')' > */
+protected $match_fact_typestack = array('fact');
+public function match_fact ($stack = array()) {
+	$matchrule = "fact";
+	$result = $this->construct($matchrule, $matchrule, null);
+	$_20 = null;
+	do {
+		$res_7 = $result;
+		$pos_7 = $this->pos;
+		$_10 = null;
 		do {
-			$matcher = 'match_'.'Number'; $key = $matcher; $pos = $this->pos;
-			$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-			if ($subres !== FALSE) { $this->store($result, $subres); }
-			else { $_4 = FALSE; break; }
-			if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-			$_4 = TRUE; break;
+			$matcher = 'match_'.'num';
+			$key = $matcher; $pos = $this->pos;
+			$indent = str_repeat("    ", $this->depth);
+			$this->depth++;
+			$debug_sub = (strlen($this->string) - $this->pos > 20)
+			? (substr($this->string, $this->pos, 20) . " [...]")
+			: substr($this->string, $this->pos);
+			$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+			printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+			$subres = $this->packhas($key, $pos)
+			? $this->packread($key, $pos)
+			: $this->packwrite($key, $pos,
+			$this->$matcher(array_merge($stack, array($result)))
+			);
+			if (false !== $subres) {
+				printf("%sMATCH\n", $indent);
+				$this->depth--;
+				$this->store($result, $subres);
+			}
+			else {
+				printf("%sFAIL\n", $indent);
+				$this->depth--;
+				$_10 = false; break;
+			}
+			if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+			$_10 = true; break;
 		}
 		while(0);
-		if($_4 === TRUE) { $_14 = TRUE; break; }
-		$result = $res_1;
-		$this->pos = $pos_1;
-		$_12 = NULL;
+		if(true === $_10) { $_20 = true; break; }
+		$result = $res_7;
+		$this->pos = $pos_7;
+		$_18 = null;
 		do {
 			$subres = substr($this->string, $this->pos, 1);
+			$indent = str_repeat("    ", $this->depth);
+			$this->depth++;
+			$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $subres);
+			printf("%sMatching literal '(' against '%s'\n", $indent, $debug_sub);
 			if ('(' === $subres) {
+				printf("%sMATCH\n", $indent);
+				$this->depth--;
 				$this->pos += 1;
-				$result["text"] .= $subres;
+				$result["_text"] .= $subres;
 			}
-			else { $_12 = FALSE; break; }
-			if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-			$matcher = 'match_'.'Expr'; $key = $matcher; $pos = $this->pos;
-			$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-			if ($subres !== FALSE) { $this->store($result, $subres); }
-			else { $_12 = FALSE; break; }
-			if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
+			else {
+				printf("%sFAIL\n", $indent);
+				$this->depth--;
+				$_18 = false; break;
+			}
+			if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+			$matcher = 'match_'.'expr';
+			$key = $matcher; $pos = $this->pos;
+			$indent = str_repeat("    ", $this->depth);
+			$this->depth++;
+			$debug_sub = (strlen($this->string) - $this->pos > 20)
+			? (substr($this->string, $this->pos, 20) . " [...]")
+			: substr($this->string, $this->pos);
+			$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+			printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+			$subres = $this->packhas($key, $pos)
+			? $this->packread($key, $pos)
+			: $this->packwrite($key, $pos,
+			$this->$matcher(array_merge($stack, array($result)))
+			);
+			if (false !== $subres) {
+				printf("%sMATCH\n", $indent);
+				$this->depth--;
+				$this->store($result, $subres);
+			}
+			else {
+				printf("%sFAIL\n", $indent);
+				$this->depth--;
+				$_18 = false; break;
+			}
+			if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
 			$subres = substr($this->string, $this->pos, 1);
+			$indent = str_repeat("    ", $this->depth);
+			$this->depth++;
+			$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $subres);
+			printf("%sMatching literal ')' against '%s'\n", $indent, $debug_sub);
 			if (')' === $subres) {
+				printf("%sMATCH\n", $indent);
+				$this->depth--;
 				$this->pos += 1;
-				$result["text"] .= $subres;
+				$result["_text"] .= $subres;
 			}
-			else { $_12 = FALSE; break; }
-			if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-			$_12 = TRUE; break;
+			else {
+				printf("%sFAIL\n", $indent);
+				$this->depth--;
+				$_18 = false; break;
+			}
+			if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+			$_18 = true; break;
 		}
 		while(0);
-		if($_12 === TRUE) { $_14 = TRUE; break; }
-		$result = $res_1;
-		$this->pos = $pos_1;
-		$_14 = FALSE; break;
+		if(true === $_18) { $_20 = true; break; }
+		$result = $res_7;
+		$this->pos = $pos_7;
+		$_20 = false; break;
 	}
 	while(0);
-	if($_14 === TRUE) { return $this->finalise($result); }
-	if($_14 === FALSE) { return FALSE; }
-}
-
-function Value_Number ( &$result, $sub ) {
-		$result['val'] = $sub['text'] ;
-	}
-
-function Value_Expr ( &$result, $sub ) {
-		$result['val'] = $sub['val'] ;
-	}
-
-/* Times: '*' > operand:Value > */
-protected $match_Times_typestack = array('Times');
-function match_Times ($stack = array()) {
-	$matchrule = "Times";
-	$result = $this->construct($matchrule, $matchrule, null);
-	$_20 = NULL;
-	do {
-		$subres = substr($this->string, $this->pos, 1);
-		if ('*' === $subres) {
-			$this->pos += 1;
-			$result["text"] .= $subres;
-		}
-		else { $_20 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-		$matcher = 'match_'.'Value'; $key = $matcher; $pos = $this->pos;
-		$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-		if ($subres !== FALSE) {
-			$this->store($result, $subres, "operand");
-		}
-		else { $_20 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-		$_20 = TRUE; break;
-	}
-	while(0);
-	if($_20 === TRUE) { return $this->finalise($result); }
-	if($_20 === FALSE) { return FALSE; }
+	if(true === $_20) { return $this->finalise($result); }
+	if(false === $_20) { return false; }
 }
 
 
-/* Div: '/' > operand:Value > */
-protected $match_Div_typestack = array('Div');
-function match_Div ($stack = array()) {
-	$matchrule = "Div";
-	$result = $this->construct($matchrule, $matchrule, null);
-	$_26 = NULL;
-	do {
-		$subres = substr($this->string, $this->pos, 1);
-		if ('/' === $subres) {
-			$this->pos += 1;
-			$result["text"] .= $subres;
-		}
-		else { $_26 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-		$matcher = 'match_'.'Value'; $key = $matcher; $pos = $this->pos;
-		$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-		if ($subres !== FALSE) {
-			$this->store($result, $subres, "operand");
-		}
-		else { $_26 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-		$_26 = TRUE; break;
-	}
-	while(0);
-	if($_26 === TRUE) { return $this->finalise($result); }
-	if($_26 === FALSE) { return FALSE; }
-}
 
+public function fact_num (&$res, $sub) {
+        $res['val'] = floatval($sub['_text']);
+    }
 
-/* Product: Value > ( Times | Div ) * */
-protected $match_Product_typestack = array('Product');
-function match_Product ($stack = array()) {
-	$matchrule = "Product";
+public function fact_expr (&$res, $sub) {
+        $res['val'] = $sub['val'];
+    }
+
+/* term: a:fact > ( ('*' > mul:fact >) | ('/' > div:fact >) )* */
+protected $match_term_typestack = array('term');
+public function match_term ($stack = array()) {
+	$matchrule = "term";
 	$result = $this->construct($matchrule, $matchrule, null);
-	$_37 = NULL;
+	$_41 = null;
 	do {
-		$matcher = 'match_'.'Value'; $key = $matcher; $pos = $this->pos;
-		$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-		if ($subres !== FALSE) { $this->store($result, $subres); }
-		else { $_37 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
+		$matcher = 'match_'.'fact';
+		$key = $matcher; $pos = $this->pos;
+		$indent = str_repeat("    ", $this->depth);
+		$this->depth++;
+		$debug_sub = (strlen($this->string) - $this->pos > 20)
+		? (substr($this->string, $this->pos, 20) . " [...]")
+		: substr($this->string, $this->pos);
+		$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+		printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+		$subres = $this->packhas($key, $pos)
+		? $this->packread($key, $pos)
+		: $this->packwrite($key, $pos,
+		$this->$matcher(array_merge($stack, array($result)))
+		);
+		if (false !== $subres) {
+			printf("%sMATCH\n", $indent);
+			$this->depth--;
+			$this->store($result, $subres, "a");
+		}
+		else {
+			printf("%sFAIL\n", $indent);
+			$this->depth--;
+			$_41 = false; break;
+		}
+		if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
 		while (true) {
-			$res_36 = $result;
-			$pos_36 = $this->pos;
-			$_35 = NULL;
+			$res_40 = $result;
+			$pos_40 = $this->pos;
+			$_39 = null;
 			do {
-				$_33 = NULL;
+				$_37 = null;
 				do {
-					$res_30 = $result;
-					$pos_30 = $this->pos;
-					$matcher = 'match_'.'Times'; $key = $matcher; $pos = $this->pos;
-					$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-					if ($subres !== FALSE) {
-						$this->store($result, $subres);
-						$_33 = TRUE; break;
+					$res_24 = $result;
+					$pos_24 = $this->pos;
+					$_29 = null;
+					do {
+						$subres = substr($this->string, $this->pos, 1);
+						$indent = str_repeat("    ", $this->depth);
+						$this->depth++;
+						$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $subres);
+						printf("%sMatching literal '*' against '%s'\n", $indent, $debug_sub);
+						if ('*' === $subres) {
+							printf("%sMATCH\n", $indent);
+							$this->depth--;
+							$this->pos += 1;
+							$result["_text"] .= $subres;
+						}
+						else {
+							printf("%sFAIL\n", $indent);
+							$this->depth--;
+							$_29 = false; break;
+						}
+						if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+						$matcher = 'match_'.'fact';
+						$key = $matcher; $pos = $this->pos;
+						$indent = str_repeat("    ", $this->depth);
+						$this->depth++;
+						$debug_sub = (strlen($this->string) - $this->pos > 20)
+						? (substr($this->string, $this->pos, 20) . " [...]")
+						: substr($this->string, $this->pos);
+						$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+						printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+						$subres = $this->packhas($key, $pos)
+						? $this->packread($key, $pos)
+						: $this->packwrite($key, $pos,
+						$this->$matcher(array_merge($stack, array($result)))
+						);
+						if (false !== $subres) {
+							printf("%sMATCH\n", $indent);
+							$this->depth--;
+							$this->store($result, $subres, "mul");
+						}
+						else {
+							printf("%sFAIL\n", $indent);
+							$this->depth--;
+							$_29 = false; break;
+						}
+						if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+						$_29 = true; break;
 					}
-					$result = $res_30;
-					$this->pos = $pos_30;
-					$matcher = 'match_'.'Div'; $key = $matcher; $pos = $this->pos;
-					$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-					if ($subres !== FALSE) {
-						$this->store($result, $subres);
-						$_33 = TRUE; break;
+					while(0);
+					if(true === $_29) { $_37 = true; break; }
+					$result = $res_24;
+					$this->pos = $pos_24;
+					$_35 = null;
+					do {
+						$subres = substr($this->string, $this->pos, 1);
+						$indent = str_repeat("    ", $this->depth);
+						$this->depth++;
+						$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $subres);
+						printf("%sMatching literal '/' against '%s'\n", $indent, $debug_sub);
+						if ('/' === $subres) {
+							printf("%sMATCH\n", $indent);
+							$this->depth--;
+							$this->pos += 1;
+							$result["_text"] .= $subres;
+						}
+						else {
+							printf("%sFAIL\n", $indent);
+							$this->depth--;
+							$_35 = false; break;
+						}
+						if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+						$matcher = 'match_'.'fact';
+						$key = $matcher; $pos = $this->pos;
+						$indent = str_repeat("    ", $this->depth);
+						$this->depth++;
+						$debug_sub = (strlen($this->string) - $this->pos > 20)
+						? (substr($this->string, $this->pos, 20) . " [...]")
+						: substr($this->string, $this->pos);
+						$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+						printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+						$subres = $this->packhas($key, $pos)
+						? $this->packread($key, $pos)
+						: $this->packwrite($key, $pos,
+						$this->$matcher(array_merge($stack, array($result)))
+						);
+						if (false !== $subres) {
+							printf("%sMATCH\n", $indent);
+							$this->depth--;
+							$this->store($result, $subres, "div");
+						}
+						else {
+							printf("%sFAIL\n", $indent);
+							$this->depth--;
+							$_35 = false; break;
+						}
+						if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+						$_35 = true; break;
 					}
-					$result = $res_30;
-					$this->pos = $pos_30;
-					$_33 = FALSE; break;
+					while(0);
+					if(true === $_35) { $_37 = true; break; }
+					$result = $res_24;
+					$this->pos = $pos_24;
+					$_37 = false; break;
 				}
 				while(0);
-				if($_33 === FALSE) { $_35 = FALSE; break; }
-				$_35 = TRUE; break;
+				if(false === $_37) { $_39 = false; break; }
+				$_39 = true; break;
 			}
 			while(0);
-			if($_35 === FALSE) {
-				$result = $res_36;
-				$this->pos = $pos_36;
-				unset($res_36);
-				unset($pos_36);
+			if(false === $_39) {
+				$result = $res_40;
+				$this->pos = $pos_40;
+				unset($res_40);
+				unset($pos_40);
 				break;
 			}
 		}
-		$_37 = TRUE; break;
+		$_41 = true; break;
 	}
 	while(0);
-	if($_37 === TRUE) { return $this->finalise($result); }
-	if($_37 === FALSE) { return FALSE; }
-}
-
-function Product_Value ( &$result, $sub ) {
-		$result['val'] = $sub['val'] ;
-	}
-
-function Product_Times ( &$result, $sub ) {
-		$result['val'] *= $sub['operand']['val'] ;
-	}
-
-function Product_Div ( &$result, $sub ) {
-		$result['val'] /= $sub['operand']['val'] ;
-	}
-
-/* Plus: '+' > operand:Product > */
-protected $match_Plus_typestack = array('Plus');
-function match_Plus ($stack = array()) {
-	$matchrule = "Plus";
-	$result = $this->construct($matchrule, $matchrule, null);
-	$_43 = NULL;
-	do {
-		$subres = substr($this->string, $this->pos, 1);
-		if ('+' === $subres) {
-			$this->pos += 1;
-			$result["text"] .= $subres;
-		}
-		else { $_43 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-		$matcher = 'match_'.'Product'; $key = $matcher; $pos = $this->pos;
-		$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-		if ($subres !== FALSE) {
-			$this->store($result, $subres, "operand");
-		}
-		else { $_43 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-		$_43 = TRUE; break;
-	}
-	while(0);
-	if($_43 === TRUE) { return $this->finalise($result); }
-	if($_43 === FALSE) { return FALSE; }
+	if(true === $_41) { return $this->finalise($result); }
+	if(false === $_41) { return false; }
 }
 
 
-/* Minus: '-' > operand:Product > */
-protected $match_Minus_typestack = array('Minus');
-function match_Minus ($stack = array()) {
-	$matchrule = "Minus";
-	$result = $this->construct($matchrule, $matchrule, null);
-	$_49 = NULL;
-	do {
-		$subres = substr($this->string, $this->pos, 1);
-		if ('-' === $subres) {
-			$this->pos += 1;
-			$result["text"] .= $subres;
-		}
-		else { $_49 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-		$matcher = 'match_'.'Product'; $key = $matcher; $pos = $this->pos;
-		$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-		if ($subres !== FALSE) {
-			$this->store($result, $subres, "operand");
-		}
-		else { $_49 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
-		$_49 = TRUE; break;
-	}
-	while(0);
-	if($_49 === TRUE) { return $this->finalise($result); }
-	if($_49 === FALSE) { return FALSE; }
-}
 
+public function term_a (&$res, $sub) {
+        $res['val'] = $sub['val'];
+    }
 
-/* Sum: Product > ( Plus | Minus ) * */
-protected $match_Sum_typestack = array('Sum');
-function match_Sum ($stack = array()) {
-	$matchrule = "Sum";
+public function term_mul (&$res, $sub){
+        $res['val'] *= $sub['val'];
+    }
+
+public function term_div (&$res, $sub){
+        $res['val'] /= $sub['val'];
+    }
+
+/* expr: a:term > ( ('+' > plus:term >) | ('-' > minus:term >) )* */
+protected $match_expr_typestack = array('expr');
+public function match_expr ($stack = array()) {
+	$matchrule = "expr";
 	$result = $this->construct($matchrule, $matchrule, null);
-	$_60 = NULL;
+	$_62 = null;
 	do {
-		$matcher = 'match_'.'Product'; $key = $matcher; $pos = $this->pos;
-		$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-		if ($subres !== FALSE) { $this->store($result, $subres); }
-		else { $_60 = FALSE; break; }
-		if (($subres = $this->whitespace()) !== FALSE) { $result["text"] .= $subres; }
+		$matcher = 'match_'.'term';
+		$key = $matcher; $pos = $this->pos;
+		$indent = str_repeat("    ", $this->depth);
+		$this->depth++;
+		$debug_sub = (strlen($this->string) - $this->pos > 20)
+		? (substr($this->string, $this->pos, 20) . " [...]")
+		: substr($this->string, $this->pos);
+		$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+		printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+		$subres = $this->packhas($key, $pos)
+		? $this->packread($key, $pos)
+		: $this->packwrite($key, $pos,
+		$this->$matcher(array_merge($stack, array($result)))
+		);
+		if (false !== $subres) {
+			printf("%sMATCH\n", $indent);
+			$this->depth--;
+			$this->store($result, $subres, "a");
+		}
+		else {
+			printf("%sFAIL\n", $indent);
+			$this->depth--;
+			$_62 = false; break;
+		}
+		if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
 		while (true) {
-			$res_59 = $result;
-			$pos_59 = $this->pos;
-			$_58 = NULL;
+			$res_61 = $result;
+			$pos_61 = $this->pos;
+			$_60 = null;
 			do {
-				$_56 = NULL;
+				$_58 = null;
 				do {
-					$res_53 = $result;
-					$pos_53 = $this->pos;
-					$matcher = 'match_'.'Plus'; $key = $matcher; $pos = $this->pos;
-					$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-					if ($subres !== FALSE) {
-						$this->store($result, $subres);
-						$_56 = TRUE; break;
+					$res_45 = $result;
+					$pos_45 = $this->pos;
+					$_50 = null;
+					do {
+						$subres = substr($this->string, $this->pos, 1);
+						$indent = str_repeat("    ", $this->depth);
+						$this->depth++;
+						$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $subres);
+						printf("%sMatching literal '+' against '%s'\n", $indent, $debug_sub);
+						if ('+' === $subres) {
+							printf("%sMATCH\n", $indent);
+							$this->depth--;
+							$this->pos += 1;
+							$result["_text"] .= $subres;
+						}
+						else {
+							printf("%sFAIL\n", $indent);
+							$this->depth--;
+							$_50 = false; break;
+						}
+						if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+						$matcher = 'match_'.'term';
+						$key = $matcher; $pos = $this->pos;
+						$indent = str_repeat("    ", $this->depth);
+						$this->depth++;
+						$debug_sub = (strlen($this->string) - $this->pos > 20)
+						? (substr($this->string, $this->pos, 20) . " [...]")
+						: substr($this->string, $this->pos);
+						$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+						printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+						$subres = $this->packhas($key, $pos)
+						? $this->packread($key, $pos)
+						: $this->packwrite($key, $pos,
+						$this->$matcher(array_merge($stack, array($result)))
+						);
+						if (false !== $subres) {
+							printf("%sMATCH\n", $indent);
+							$this->depth--;
+							$this->store($result, $subres, "plus");
+						}
+						else {
+							printf("%sFAIL\n", $indent);
+							$this->depth--;
+							$_50 = false; break;
+						}
+						if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+						$_50 = true; break;
 					}
-					$result = $res_53;
-					$this->pos = $pos_53;
-					$matcher = 'match_'.'Minus'; $key = $matcher; $pos = $this->pos;
-					$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-					if ($subres !== FALSE) {
-						$this->store($result, $subres);
-						$_56 = TRUE; break;
+					while(0);
+					if(true === $_50) { $_58 = true; break; }
+					$result = $res_45;
+					$this->pos = $pos_45;
+					$_56 = null;
+					do {
+						$subres = substr($this->string, $this->pos, 1);
+						$indent = str_repeat("    ", $this->depth);
+						$this->depth++;
+						$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $subres);
+						printf("%sMatching literal '-' against '%s'\n", $indent, $debug_sub);
+						if ('-' === $subres) {
+							printf("%sMATCH\n", $indent);
+							$this->depth--;
+							$this->pos += 1;
+							$result["_text"] .= $subres;
+						}
+						else {
+							printf("%sFAIL\n", $indent);
+							$this->depth--;
+							$_56 = false; break;
+						}
+						if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+						$matcher = 'match_'.'term';
+						$key = $matcher; $pos = $this->pos;
+						$indent = str_repeat("    ", $this->depth);
+						$this->depth++;
+						$debug_sub = (strlen($this->string) - $this->pos > 20)
+						? (substr($this->string, $this->pos, 20) . " [...]")
+						: substr($this->string, $this->pos);
+						$debug_sub = preg_replace(["/\r/", "/\n/"], ['\r', '\n'], $debug_sub);
+						printf("%sMatching against %s (%s)\n", $indent, $matcher, $debug_sub);
+						$subres = $this->packhas($key, $pos)
+						? $this->packread($key, $pos)
+						: $this->packwrite($key, $pos,
+						$this->$matcher(array_merge($stack, array($result)))
+						);
+						if (false !== $subres) {
+							printf("%sMATCH\n", $indent);
+							$this->depth--;
+							$this->store($result, $subres, "minus");
+						}
+						else {
+							printf("%sFAIL\n", $indent);
+							$this->depth--;
+							$_56 = false; break;
+						}
+						if (false !== ($subres = $this->whitespace())) { $result["_text"] .= $subres; }
+						$_56 = true; break;
 					}
-					$result = $res_53;
-					$this->pos = $pos_53;
-					$_56 = FALSE; break;
+					while(0);
+					if(true === $_56) { $_58 = true; break; }
+					$result = $res_45;
+					$this->pos = $pos_45;
+					$_58 = false; break;
 				}
 				while(0);
-				if($_56 === FALSE) { $_58 = FALSE; break; }
-				$_58 = TRUE; break;
+				if(false === $_58) { $_60 = false; break; }
+				$_60 = true; break;
 			}
 			while(0);
-			if($_58 === FALSE) {
-				$result = $res_59;
-				$this->pos = $pos_59;
-				unset($res_59);
-				unset($pos_59);
+			if(false === $_60) {
+				$result = $res_61;
+				$this->pos = $pos_61;
+				unset($res_61);
+				unset($pos_61);
 				break;
 			}
 		}
-		$_60 = TRUE; break;
+		$_62 = true; break;
 	}
 	while(0);
-	if($_60 === TRUE) { return $this->finalise($result); }
-	if($_60 === FALSE) { return FALSE; }
+	if(true === $_62) { return $this->finalise($result); }
+	if(false === $_62) { return false; }
 }
 
-function Sum_Product ( &$result, $sub ) {
-		$result['val'] = $sub['val'] ;
-	}
 
-function Sum_Plus ( &$result, $sub ) {
-		$result['val'] += $sub['operand']['val'] ;
-	}
 
-function Sum_Minus ( &$result, $sub ) {
-		$result['val'] -= $sub['operand']['val'] ;
-	}
+public function expr_a (&$res, $sub) {
+        $res['val'] = $sub['val'];
+    }
 
-/* Expr: Sum */
-protected $match_Expr_typestack = array('Expr');
-function match_Expr ($stack = array()) {
-	$matchrule = "Expr";
-	$result = $this->construct($matchrule, $matchrule, null);
-	$matcher = 'match_'.'Sum'; $key = $matcher; $pos = $this->pos;
-	$subres = ($this->packhas($key, $pos) ? $this->packread($key, $pos) : $this->packwrite($key, $pos, $this->$matcher(array_merge($stack, array($result)))));
-	if ($subres !== FALSE) {
-		$this->store($result, $subres);
-		return $this->finalise($result);
-	}
-	else { return FALSE; }
-}
+public function expr_plus (&$res, $sub){
+        $res['val'] += $sub['val'];
+    }
 
-function Expr_Sum ( &$result, $sub ) {
-		$result['val'] = $sub['val'] ;
-	}
+public function expr_minus (&$res, $sub){
+        $res['val'] -= $sub['val'];
+    }
 
 
 

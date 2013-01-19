@@ -1,6 +1,6 @@
 <?php
 
-use ju1ius\Peg\Parser;
+use hafriedlander\Peg\Parser;
 
 /**
  * This parser strictly matches the RFC822 standard. No characters outside the ASCII range 0-127 are allowed

@@ -1,8 +1,8 @@
 <?php
 
-require __DIR__.'/../autoload.php';
+require __DIR__.'/../autoloader.php';
 
-use ju1ius\Peg\Compiler;
+use hafriedlander\Peg\Compiler;
 
 class ParserTestWrapper
 {
@@ -46,9 +46,9 @@ class ParserTestBase extends PHPUnit_Framework_TestCase
   {
 		$class = 'Parser_' . sha1($grammar);
     $code = Compiler::compile(<<<EOS
-use ju1ius\Peg\Parser;
+use hafriedlander\Peg\Parser;
 
-class $class extends Parser
+class $class extends Parser\Basic
 {
 $grammar
 }

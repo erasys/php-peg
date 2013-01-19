@@ -1,17 +1,9 @@
 <?php
 
-require_once __DIR__.'/lib/vendor/Symfony/Component/ClassLoader/UniversalClassLoader.php';
-
-$loader = new Symfony\Component\ClassLoader\UniversalClassLoader();
-$loader->registerNamespace(
-  'ju1ius', array(
-    __DIR__.'/lib',
-  )
-);
-$loader->register();
+require_once "autoloader.php";
 
 
-use ju1ius\Peg\Compiler;
+use hafriedlander\Peg\Compiler;
 
 
 if ($argc < 2 || $argc > 3) {

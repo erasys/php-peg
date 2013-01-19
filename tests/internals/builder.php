@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__.'/../autoload.php';
+require_once __DIR__.'/../autoloader.php';
 
-use ju1ius\Peg\Compiler\Builder;
+use hafriedlander\Peg\Compiler\Builder;
 
 $b = new Builder();
 

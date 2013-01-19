@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__.'/../autoload.php';
+require_once __DIR__.'/../autoloader.php';
 
-use ju1ius\Peg\Compiler;
+use hafriedlander\Peg\Compiler;
 
 $peg_1 = __DIR__.'/../../examples/Rfc5322.peg.php';
 $output_1 = __DIR__.'/Rfc5322Parser.php';

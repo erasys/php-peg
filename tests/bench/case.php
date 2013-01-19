@@ -27,7 +27,7 @@ $timer = new Benchmark_Timer();
 $nb_iterations = 100000;
 $timer->start();
 
-$str = "7bits";
+$str = "7bit";
 
 echo "casecmp_internal\n";
 for ($i = 0; $i < $nb_iterations; $i++) {

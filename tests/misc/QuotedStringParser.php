@@ -1,6 +1,6 @@
 <?php
 
-use ju1ius\Peg\Parser;
+use hafriedlander\Peg\Parser;
 
 class QuotedString extends Parser
 {

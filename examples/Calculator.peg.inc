@@ -1,51 +1,45 @@
 <?php
 
-use ju1ius\Peg\Parser;
+use hafriedlander\Peg\Parser;
 
-class Calculator extends Parser
+class Calculator extends Parser\Basic
 {
 
 /*!* Calculator
 
-Number: /[0-9]+/
-Value: Number > | '(' > Expr > ')' >
-	function Number( &$result, $sub ) {
-		$result['val'] = $sub['text'] ;
-	}
-	function Expr( &$result, $sub ) {
-		$result['val'] = $sub['val'] ;
-	}
+int: / [-]?[1-9][0-9]* /
+float: / [-]?[0-9]*\.[0-9]+ /
+num: int | float
 
-Times: '*' > operand:Value >
-Div: '/' > operand:Value >
-Product: Value > ( Times | Div ) *
-	function Value( &$result, $sub ) {
-		$result['val'] = $sub['val'] ;
-	}
-	function Times( &$result, $sub ) {
-		$result['val'] *= $sub['operand']['val'] ;
-	}
-	function Div( &$result, $sub ) {
-		$result['val'] /= $sub['operand']['val'] ;
-	}
+fact: num > | '(' > expr > ')' >
+    function num(&$res, $sub) {
+        $res['val'] = floatval($sub['_text']);
+    }
+    function expr(&$res, $sub) {
+        $res['val'] = $sub['val'];
+    }
 
-Plus: '+' > operand:Product >
-Minus: '-' > operand:Product >
-Sum: Product > ( Plus | Minus ) *
-	function Product( &$result, $sub ) {
-		$result['val'] = $sub['val'] ;
-	}
-	function Plus( &$result, $sub ) {
-		$result['val'] += $sub['operand']['val'] ;
-	}
-	function Minus( &$result, $sub ) {
-		$result['val'] -= $sub['operand']['val'] ;
-	}
+term: a:fact > ( ('*' > mul:fact >) | ('/' > div:fact >) )*
+    function a(&$res, $sub) {
+        $res['val'] = $sub['val'];
+    }
+    function mul(&$res, $sub){
+        $res['val'] *= $sub['val'];
+    }
+    function div(&$res, $sub){
+        $res['val'] /= $sub['val'];
+    }
 
-Expr: Sum
-	function Sum( &$result, $sub ) {
-		$result['val'] = $sub['val'] ;
-	}
+expr: a:term > ( ('+' > plus:term >) | ('-' > minus:term >) )*
+    function a(&$res, $sub) {
+        $res['val'] = $sub['val'];
+    }
+    function plus(&$res, $sub){
+        $res['val'] += $sub['val'];
+    }
+    function minus(&$res, $sub){
+        $res['val'] -= $sub['val'];
+    }
 
 */
 

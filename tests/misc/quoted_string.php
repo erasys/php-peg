@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__.'/../autoload.php';
+require_once __DIR__.'/../autoloader.php';
 
-use ju1ius\Peg\Compiler;
+use hafriedlander\Peg\Compiler;
 
 $peg = __DIR__.'/../../examples/QuotedString.peg.php';
 $output = __DIR__.'/QuotedStringParser.php';

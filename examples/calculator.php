@@ -8,8 +8,8 @@ ExamplesCompiler::compile(
 );
 
 //$x = new Calculator('(2 + 4) * 3 - 10') ;
-$x = new Calculator('( 2 + 4 ) * 3') ;
-$res = $x->match_Expr();
+$x = new Calculator('( 2 + 4 ) * 0.5 / 3') ;
+$res = $x->match_expr();
 
 if (false === $res) {
 	echo "No Match\n";
