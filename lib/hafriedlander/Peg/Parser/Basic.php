@@ -18,9 +18,20 @@ class Basic
     protected $depth;
     protected $regexps;
 
+    protected $whitespace_chars = '[\x20\t]';
+    protected $ignore_whitespace = false;
+    protected $normalize_whitespace = false;
+
     public function __construct($string=null)
     {
         if (null !== $string) $this->setSource($string);
+    }
+
+    public function configureWhitespace(array $config)
+    {
+        if (isset($config['chars'])) $this->whitespace_chars = $config['chars'];
+        if (isset($config['ignore'])) $this->ignore_whitespace = $config['ignore'];
+        if (isset($config['normalize'])) $this->normalize_whitespace = $config['normalize'];
     }
 
     public function setSource($string)
@@ -46,10 +57,17 @@ class Basic
 
     public function whitespace()
     {
-        $matched = preg_match('/[ \t]+/', $this->string, $matches, PREG_OFFSET_CAPTURE, $this->pos);
+        $matched = preg_match(
+            '/\G'.$this->whitespace_chars.'+/',
+            $this->string,
+            $matches,
+            PREG_OFFSET_CAPTURE,
+            $this->pos
+        );
         if ($matched && $matches[0][1] === $this->pos) {
             $this->pos += strlen($matches[0][0]);
-            return ' ';
+            return $this->ignore_whitespace ? ''
+                : $this->normalize_whitespace ?: $matches[0][0];
         }
         return false;
     }
