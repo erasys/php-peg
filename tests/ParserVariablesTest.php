@@ -6,12 +6,12 @@ class ParserVariablesTest extends ParserTestBase {
 	
 	public function testBasicLiteralVariables() {
 		$parser = $this->buildParser('
-			/*!* BasicVariables
-			Foo: Letter:"a" "$Letter"
-			Bar: Letter:"b" "$Letter $Letter"
-			Baz: Letter:"c" "$Letter a $Letter a"
-			Qux: Letter:"d" "{$Letter}a{$Letter}a"
-			*/
+/*!* BasicVariables
+Foo: Letter:"a" "$Letter"
+Bar: Letter:"b" "$Letter $Letter"
+Baz: Letter:"c" "$Letter a $Letter a"
+Qux: Letter:"d" "{$Letter}a{$Letter}a"
+*/
 		');
 		
 		$parser->assertMatches('Foo', 'aa');
@@ -22,15 +22,15 @@ class ParserVariablesTest extends ParserTestBase {
 	
 	public function testRecurseOnVariables() {
 		$parser = $this->buildParser('
-			/*!* RecurseOnVariablesParser
-			A: "a"
-			B: "b"
-			Foo: $Template
-			Bar: Foo
-				function __construct(&$res){ $res["Template"] = "A"; }
-			Baz: Foo
-				function __construct(&$res){ $res["Template"] = "B"; }
-			*/
+/*!* RecurseOnVariablesParser
+A: "a"
+B: "b"
+Foo: $Template
+Bar: Foo
+  function __construct(&$res){ $res["Template"] = "A"; }
+Baz: Foo
+  function __construct(&$res){ $res["Template"] = "B"; }
+*/
 		');
 
 		$parser->assertMatches('Bar', 'a');	$parser->assertDoesntMatch('Bar', 'b');
@@ -39,13 +39,13 @@ class ParserVariablesTest extends ParserTestBase {
 	
 	public function testSetOnRuleVariables() {
 		$parser = $this->buildParser('
-			/*!* SetOnRuleVariablesParser
-			A: "a"
-			B: "b"
-			Foo: $Template
-			Bar (Template = A): Foo
-			Baz (Template = B): Foo
-			*/
+/*!* SetOnRuleVariablesParser
+A: "a"
+B: "b"
+Foo: $Template
+Bar (Template = A): Foo
+Baz (Template = B): Foo
+*/
 		');
 
 		$parser->assertMatches('Bar', 'a');

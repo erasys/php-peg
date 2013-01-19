@@ -7,10 +7,10 @@ class ParserInheritanceTest extends ParserTestBase {
 	public function testBasicInheritance() {
 		
 		$parser = $this->buildParser('
-			/*!* BasicInheritanceTestParser
-			Foo: "a"
-			Bar extends Foo
-			*/
+/*!* BasicInheritanceTestParser
+Foo: "a"
+Bar extends Foo
+*/
 		');
 
 		$this->assertTrue($parser->matches('Foo', 'a'));
@@ -24,11 +24,11 @@ class ParserInheritanceTest extends ParserTestBase {
 	public function testBasicInheritanceConstructFallback() {
 		
 		$parser = $this->buildParser('
-			/*!* BasicInheritanceConstructFallbackParser
-			Foo: "a"
-				function __construct(&$res){ $res["test"] = "test"; }
-			Bar extends Foo
-			*/
+/*!* BasicInheritanceConstructFallbackParser
+Foo: "a"
+  function __construct(&$res){ $res["test"] = "test"; }
+Bar extends Foo
+*/
 		');
 
 		$res = $parser->match('Foo', 'a');
@@ -38,12 +38,12 @@ class ParserInheritanceTest extends ParserTestBase {
 		$this->assertEquals($res['test'], 'test');
 		
 		$parser = $this->buildParser('
-			/*!* BasicInheritanceConstructFallbackParser2
-			Foo: "a"
-				function __construct(&$res){ $res["testa"] = "testa"; }
-			Bar extends Foo
-				function __construct(&$res){ $res["testb"] = "testb"; }
-			*/
+/*!* BasicInheritanceConstructFallbackParser2
+Foo: "a"
+  function __construct(&$res){ $res["testa"] = "testa"; }
+Bar extends Foo
+  function __construct(&$res){ $res["testb"] = "testb"; }
+*/
 		');
 
 		$res = $parser->match('Foo', 'a');
@@ -61,11 +61,11 @@ class ParserInheritanceTest extends ParserTestBase {
 	public function testBasicInheritanceStoreFallback() {
 		
 		$parser = $this->buildParser('
-			/*!* BasicInheritanceStoreFallbackParser
-			Foo: Pow:"a"
-				function *(&$res, $sub){ $res["test"] = "test"; }
-			Bar extends Foo
-			*/
+/*!* BasicInheritanceStoreFallbackParser
+Foo: Pow:"a"
+  function *(&$res, $sub){ $res["test"] = "test"; }
+Bar extends Foo
+*/
 		');
 
 		$res = $parser->match('Foo', 'a');
@@ -75,14 +75,14 @@ class ParserInheritanceTest extends ParserTestBase {
 		$this->assertEquals($res['test'], 'test');
 		
 		$parser = $this->buildParser('
-			/*!* BasicInheritanceStoreFallbackParser2
-			Foo: Pow:"a" Zap:"b"
-				function *(&$res, $sub){ $res["testa"] = "testa"; }
-			Bar extends Foo
-				function *(&$res, $sub){ $res["testb"] = "testb"; }
-			Baz extends Foo
-				function Zap(&$res, $sub){ $res["testc"] = "testc"; }
-			*/
+/*!* BasicInheritanceStoreFallbackParser2
+Foo: Pow:"a" Zap:"b"
+  function *(&$res, $sub){ $res["testa"] = "testa"; }
+Bar extends Foo
+  function *(&$res, $sub){ $res["testb"] = "testb"; }
+Baz extends Foo
+  function Zap(&$res, $sub){ $res["testc"] = "testc"; }
+*/
 		');
 
 		$res = $parser->match('Foo', 'ab');
@@ -105,13 +105,13 @@ class ParserInheritanceTest extends ParserTestBase {
 
 	public function testInheritanceByReplacement() {
 		$parser = $this->buildParser('
-			/*!* InheritanceByReplacementParser
-			A: "a"
-			B: "b"
-			Foo: A B
-			Bar extends Foo; B => A
-			Baz extends Foo; A => ""
-			*/
+/*!* InheritanceByReplacementParser
+A: "a"
+B: "b"
+Foo: A B
+Bar extends Foo; B => A
+Baz extends Foo; A => ""
+*/
 		');
 		
 		$parser->assertMatches('Foo', 'ab');
