@@ -25,6 +25,7 @@ term: a:fact > ( ('*' > mul:fact >) | ('/' > div:fact >) )*
     }
     function mul(&$res, $sub){
         $res['val'] *= $sub['val'];
+        var_dump($res, $sub);
     }
     function div(&$res, $sub){
         $res['val'] /= $sub['val'];

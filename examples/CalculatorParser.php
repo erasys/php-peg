@@ -403,6 +403,7 @@ public function term_a (&$res, $sub) {
 
 public function term_mul (&$res, $sub){
         $res['val'] *= $sub['val'];
+        var_dump($res, $sub);
     }
 
 public function term_div (&$res, $sub){
