@@ -60,8 +60,6 @@ class RuleSet
 
             // Strip off indent
             if (!empty($indent)) { 
-                var_dump($indent, $line);
-
                 if (0 === strpos($line, $indent)) {
                     $line = substr($line, strlen($indent));
                 } else {
