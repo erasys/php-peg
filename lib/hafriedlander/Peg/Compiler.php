@@ -103,7 +103,7 @@ class Compiler
             }
         }
 
-        $rules = trim($match[4]);
+        $rules = $match[4];
 
         return $ruleset->compile($indent, $rules);
     }
