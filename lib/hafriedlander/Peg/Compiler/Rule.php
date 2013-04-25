@@ -405,7 +405,7 @@ class Rule extends PHPWriter
         $match->l("protected \$match_{$function_name}_typestack = $typestack;");
 
         $match->b(
-            'public function match_'.$function_name.' ($stack = array())',
+            'protected function match_'.$function_name.'($stack = array())',
             '$matchrule = "'.$function_name.'";',
             '$result = $this->construct($matchrule, $matchrule, '.$arguments.');',
             $this->parsed->compile()->replace(array(
