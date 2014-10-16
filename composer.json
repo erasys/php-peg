@@ -1,0 +1,16 @@
+{
+  "name": "erasys/php-peg",
+  "type": "library",
+  "description": "PEG (parsing expression grammar) compiler for PHP",
+  "keywords": ["Erasys", "PEG", "PHP"],
+  "homepage": "https://github.com/erasys/php-peg",
+  "license": ["MIT", "BSD", "GPL"],
+  "authors": [
+    {
+      "name": "Erasys GmbH",
+      "email": "teams@erasys.de"
+    }
+  ],
+  "require": {},
+  "autoload": {}
+}
