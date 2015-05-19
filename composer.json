@@ -12,5 +12,9 @@
     }
   ],
   "require": {},
-  "autoload": {}
+  "autoload": {
+   "psr-4": {
+     "hafriedlander\\": "lib/hafriedlander/"
+   }
+  }
 }
